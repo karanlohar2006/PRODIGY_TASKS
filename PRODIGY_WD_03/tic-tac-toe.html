@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe | Dynamic Game</title>
+    <meta name="description" content="Interactive Tic Tac Toe game with animations, AI opponent, and professional design">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#4f46e5",
+                        secondary: "#fbbf24",
+                        accent: "#10b981",
+                        dark: "#1e1b4b",
+                        light: "#f1f5f9"
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 2s infinite',
+                        'bounce-slow': 'bounce 1.5s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-in',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pop': 'pop 0.2s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        pop: {
+                            '0%': { transform: 'scale(0.8)' },
+                            '100%': { transform: 'scale(1)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-light to-gray-100 font-sans">
+    <header class="bg-dark text-white shadow-lg">
+        <nav class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                    <i class="fas fa-gamepad text-secondary text-2xl"></i>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-wide">Tic Tac Toe Pro</h1>
+                </div>
+                <ul id="nav-menu" class="flex flex-wrap gap-6 md:gap-8"></ul>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <div class="text-center mb-10 animate-fade-in">
+            <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4">Strategic Grid Challenge</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Play the classic game with modern animations, AI opponent, and dynamic visual feedback. Get three markers in a row to win!</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Game Controls Panel -->
+            <div class="bg-white rounded-xl shadow-lg p-6 lg:p-8 animate-slide-up">
+                <h3 class="text-xl font-bold text-dark mb-6 flex items-center">
+                    <i class="fas fa-sliders-h mr-3 text-primary"></i> Game Controls
+                </h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Game Mode</h4>
+                        <div id="mode-selector" class="flex flex-wrap gap-3"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Player Settings</h4>
+                        <div id="player-settings" class="grid grid-cols-2 gap-4"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Game Actions</div>
+                        <div id="game-actions" class="flex flex-wrap gap-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Board -->
+            <div class="bg-white rounded-xl shadow-lg p-6 lg:p-8 animate-slide-up">
+                <h3 class="text-xl font-bold text-dark mb-6 flex items-center">
+                    <i class="fas fa-th-large mr-3 text-primary"></i> Game Board
+                </h3>
+                <div class="flex flex-col items-center">
+                    <div class="mb-6 flex justify-between items-center w-full">
+                        <div class="text-center">
+                            <div class="text-sm font-medium text-gray-600">Player X</div>
+                            <div id="player-x-score" class="text-2xl font-bold text-primary">0</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm font-medium text-gray-600">Round</div>
+                            <div id="current-round" class="text-2xl font-bold text-dark">1</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm font-medium text-gray-600">Player O</div>
+                            <div id="player-o-score" class="text-2xl font-bold text-accent">0</div>
+                        </div>
+                    </div>
+
+                    <div id="game-board" class="grid grid-cols-3 grid-rows-3 gap-3 bg-gray-100 p-3 rounded-lg shadow-inner"></div>
+
+                    <div id="game-status" class="mt-6 text-center">
+                        <p class="text-lg font-semibold text-gray-700">Game is ready. Select a mode!</p>
+                    </div>
+
+                    <div class="mt-8 flex items-center justify-center space-x-4">
+                        <div id="current-player-indicator" class="flex items-center space-x-2">
+                            <span class="text-gray-600">Current Turn:</span>
+                            <span class="text-xl font-bold text-primary">X</span>
+                        </div>
+                        <div id="timer-display" class="flex items-center space-x-2">
+                            <i class="fas fa-clock text-gray-500"></i>
+                            <span class="text-gray-600">Turn Time:</span>
+                            <span class="text-xl font-bold text-dark">15s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Stats & History -->
+            <div class="bg-white rounded-xl shadow-lg p-6 lg:p-8 animate-slide-up">
+                <h3 class="text-xl font-bold text-dark mb-6 flex items-center">
+                    <i class="fas fa-chart-line mr-3 text-primary"></i> Game Statistics
+                </h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Win Distribution</h4>
+                        <div id="win-stats" class="grid grid-cols-3 gap-4"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">Game History</h4>
+                        <div id="history-list" class="space-y-3"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-3">AI Difficulty</h4>
+                        <div id="ai-difficulty" class="flex flex-wrap gap-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-12 animate-fade-in">
+            <h3 class="text-2xl font-bold text-dark mb-6 text-center">Game Features</h3>
+            <div id="features-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-gradient-to-r from-primary/10 to-accent/10 rounded-xl shadow-lg p-8 animate-fade-in">
+            <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+                <i class="fas fa-info-circle mr-3 text-primary"></i> How to Play
+            </h3>
+            <div id="instructions-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-10">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-gamepad text-secondary text-2xl"></i>
+                        <h2 class="text-xl font-bold">Tic Tac Toe Pro</h2>
+                    </div>
+                    <p class="text-gray-400 mt-2">Interactive web game with dynamic animations</p>
+                </div>
+                <ul id="footer-links" class="flex flex-wrap gap-6"></ul>
+            </div>
+            <div class="text-center text-gray-400">
+                <p>Built with HTML5, CSS3 & JavaScript. Features AI opponent, animated feedback, and professional UI.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data Layer - All game content and configuration
+        const navigationItems = [
+            { "label": "Game Board", "href": "#board", "icon": "fas fa-th-large" },
+            { "label": "Controls", "href": "#controls", "icon": "fas fa-sliders-h" },
+            { "label": "Statistics", "href": "#stats", "icon": "fas fa-chart-line" },
+            { "label": "Features", "href": "#features", "icon": "fas fa-star" },
+            { "label": "Instructions", "href": "#instructions", "icon": "fas fa-info-circle" }
+        ];
+
+        const gameModes = [
+            { "id": "player-vs-player", "label": "Player vs Player", "desc": "Two human players", "icon": "fas fa-users" },
+            { "id": "player-vs-ai-easy", "label": "Player vs AI (Easy)", "desc": "AI with basic strategy", "icon": "fas fa-robot" },
+            { "id": "player-vs-ai-medium", "label": "Player vs AI (Medium)", "desc": "AI with moderate strategy", "icon": "fas fa-robot" },
+            { "id": "player-vs-ai-hard", "label": "Player vs AI (Hard)", "desc": "AI with advanced strategy", "icon": "fas fa-robot" }
+        ];
+
+        const playerSettings = [
+            { "id": "player-x-name", "label": "Player X Name", "value": "Player X", "icon": "fas fa-user" },
+            { "id": "player-o-name", "label   ": "Player O Name", "value": "Player O", "icon": "fas fa-user" }
+        ];
+
+        const gameActions = [
+            { "id": "start-game", "label": "Start Game", "icon": "fas fa-play", "color": "primary" },
+            { "id": "reset-game", "label": "Reset Game", "icon": "fas fa-redo", "color": "gray" },
+            { "id": "new-round", "label": "New Round", "icon": "fas fa-plus-circle", "color": "accent" }
+        ];
+
+        const winStatsItems = [
+            { "label": "X Wins", "value": "0", "color": "primary", "icon": "fas fa-trophy" },
+            { "label": "O Wins", "value": "0", "color": "accent", "icon": "fas fa-trophy" },
+            { "label": "Draws", "value": "0", "color": "secondary", "icon": "fas fa-handshake" }
+        ];
+
+        const aiDifficultyLevels = [
+            { "id": "ai-easy", "label": "Easy", "desc": "Random moves", "active": true },
+            { "id": "ai-medium", "label": "Medium", "desc": "Basic strategy", "active": false },
+            { "id": "ai-hard", "label": "Hard", "desc": "Advanced algorithm", "active": false }
+        ];
+
+        const featuresList = [
+            { "title": "Dynamic Animations", "desc": "Smooth animations for moves, wins, and transitions", "icon": "fas fa-film" },
+            { "title": "AI Opponent", "desc": "Play against AI with three difficulty levels", "icon": "fas fa-robot" },
+            { "title": "Real-time Tracking", "desc": "Track game state, scores, and history live", "icon": "fas fa-chart-line" },
+            { "title": "Professional UI", "desc": "Modern design with intuitive controls", "icon": "fas fa-paint-brush" },
+            { "title": "Interactive Feedback", "desc": "Visual and audio feedback for all actions", "icon": "fas fa-bell" },
+            { "title": "Multi-mode Play", "desc": "Player vs Player and Player vs AI modes", "icon": "fas fa-users" },
+            { "title": "Game Statistics", "desc": "Detailed stats and win distribution charts", "icon": "fas fa-chart-bar" },
+            { "title": "Timer Control", "desc": "Turn timer to pace the game", "icon": "fas fa-clock" }
+        ];
+
+        const instructionsList = [
+            { "title": "Select Game Mode", "desc": "Choose Player vs Player or Player vs AI with desired difficulty", "icon": "fas fa-check-circle" },
+            { "title": "Make Your Move", "desc": "Click on any empty cell to place your marker (X or O)", "icon": "fas fa-hand-pointer" },
+            { "title": "Win Condition", "desc": "Get three of your markers in a row (horizontal, vertical, or diagonal)", "icon": "fas fa-flag-checkered" },
+            { "title": "Game Controls", "desc": "Use Start, Reset, and New Round buttons to manage game flow", "icon": "fas fa-gamepad" }
+        ];
+
+        const footerLinks = [
+            { "label": "Privacy Policy", "href": "#privacy", "icon": "fas fa-shield-alt" },
+            { "label": "Terms of Use", "href": "#terms", "icon": "fas fa-file-contract" },
+            { "label": "Contact", "href": "#contact", "icon": "fas fa-envelope" },
+            { "label": "GitHub", "href": "#github", "icon": "fab fa-github" },
+            { "label": "Documentation", "href": "#docs", "icon": "fas fa-book" }
+        ];
+
+        // Game State Data
+        const gameState = {
+            board: ["", "", "", "", "", "", "", "", ""],
+            currentPlayer: "X",
+            gameMode: "player-vs-player",
+            scores: { "X": 0, "O": 0, "draws": 0 },
+            currentRound: 1,
+            gameActive: false,
+            timer: 15,
+            timerActive: false,
+            history: [],
+            aiDifficulty: "easy"
+        };
+
+        // Game Board Cells Data
+        const boardCells = [
+            { "id": 0, "row": 1, "col": 1 },
+            { "id": 1, "row": 1, "col": 2 },
+            { "id": 2, "row": 1, "col": 3 },
+            { "id": 3, "row": 2, "col": 1 },
+            { "id": 4, "row": 2, "col": 2 },
+            { "id": 5, "row": 2, "col": 3 },
+            { "id": 6, "row": 3, "col": 1 },
+            { "id": 7, "row": 3, "col": 2 },
+            { "id": 8, "row": 3, "col": 3 }
+        ];
+
+        // Reusable Render Functions
+        function renderNavMenu(items) {
+            return items.map(item => 
+                `<li><a href="${item.href}" class="flex items-center space-x-2 text-gray-300 hover:text-secondary transition-colors duration-300"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`
+            ).join("");
+        }
+
+        function renderModeSelector(items) {
+            return items.map(item => 
+                `<button id="${item.id}" class="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-gray-200 hover:border-primary transition-all duration-300 bg-white shadow-sm hover:shadow-md ${gameState.gameMode === item.id ? "border-primary bg-primary/5" : ""}" data-mode="${item.id}">
+                    <i class="${item.icon} text-2xl mb-2 text-gray-600"></i>
+                    <span class="font-semibold text-gray-800">${item.label}</span>
+                    <span class="text-sm text-gray-500 mt-1">${item.desc}</span>
+                </button>`
+            ).join("");
+        }
+
+        function renderPlayerSettings(items) {
+            return items.map(item => 
+                `<div class="flex flex-col">
+                    <label class="text-sm font-medium text-gray-600 mb-2 flex items-center"><i class="${item.icon} mr-2"></i>${item.label}</label>
+                    <input type="text" id="${item.id}" value="${item.value}" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Enter name">
+                </div>`
+            ).join("");
+        }
+
+        function renderGameActions(items) {
+            return items.map(item => 
+                `<button id="${item.id}" class="flex items-center justify-center space-x-2 px-5 py-3 rounded-lg bg-${item.color} text-white font-semibold hover:opacity-90 transition-opacity duration-300 shadow-md hover:shadow-lg">
+                    <i class="${item.icon}"></i>
+                    <span>${item.label}</span>
+                </button>`
+            ).join("");
+        }
+
+        function renderWinStats(items) {
+            return items.map(item => 
+                `<div class="flex flex-col items-center justify-center p-4 rounded-lg bg-white border border-gray-200 shadow-sm">
+                    <i class="${item.icon} text-2xl mb-2 text-${item.color}"></i>
+                    <span class="text-sm font-medium text-gray-600">${item.label}</span>
+                    <span class="text-2xl font-bold text-${item.color}">${item.value}</span>
+                </div>`
+            ).join("");
+        }
+
+        function renderAIDifficulty(items) {
+            return items.map(item => 
+                `<button id="${item.id}" class="px-4 py-2 rounded-lg border border-gray-300 hover:border-primary transition-colors duration-300 ${item.active ? "bg-primary text-white border-primary" : "bg-white text-gray-800"}" data-difficulty="${item.id}">
+                    <span class="font-medium">${item.label}</span>
+                    <span class="text-sm text-gray-600 ml-1">${item.desc}</span>
+                </button>`
+            ).join("");
+        }
+
+        function renderFeatures(items) {
+            return items.map(item => 
+                `<div class="flex flex-col p-4 rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-300">
+                    <i class="${item.icon} text-2xl mb-3 text-primary"></i>
+                    <h4 class="font-bold text-dark mb-2">${item.title}</h4>
+                    <p class="text-gray-600">${item.desc}</p>
+                </div>`
+            ).join("");
+        }
+
+        function renderInstructions(items) {
+            return items.map(item => 
+                `<div class="flex flex-col p-4 rounded-lg bg-white border border-gray-200 shadow-sm">
+                    <div class="flex items-center mb-3">
+                        <i class="${item.icon} text-xl mr-3 text-accent"></i>
+                        <h4 class="font-bold text-dark">${item.title}</h4>
+                    </div>
+                    <p class="text-gray-600">${item.desc}</p>
+                </div>`
+            ).join("");
+        }
+
+        function renderFooterLinks(items) {
+            return items.map(item => 
+                `<li><a href="${item.href}" class="flex items-center space-x-2 text-gray-400 hover:text-secondary transition-colors duration-300"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`
+            ).join("");
+        }
+
+        function renderGameBoard() {
+            return boardCells.map(cell => 
+                `<div id="cell-${cell.id}" class="w-full h-full flex items-center justify-center bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer border-2 border-gray-200 hover:border-primary aspect-square animate-pop" data-index="${cell.id}">
+                    <span class="text-4xl font-bold opacity-0 transition-opacity duration-300"></span>
+                </div>`
+            ).join("");
+        }
+
+        function renderHistoryList() {
+            if (gameState.history.length === 0) {
+                return `<p class="text-gray-500 text-center py-4">No games played yet. Start a game!</p>`;
+            }
+            return gameState.history.map((entry, index) => 
+                `<div class="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-sm font-medium text-gray-700">Game ${index + 1}</span>
+                        <span class="text-xs text-gray-500">${entry.mode}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-sm font-semibold ${entry.result === "X" ? "text-primary" : entry.result === "O" ? "text-accent" : "text-secondary"}">${entry.result === "draw" ? "Draw" : entry.result + " Wins"}</span>
+                        <span class="text-xs text-gray-500">${entry.date}</span>
+                    </div>
+                </div>`
+            ).join("");
+        }
+
+        // Game Logic Functions
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+                [0, 4, 8], [2, 4, 6] // diagonals
+            ];
+
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameState.board[a] && gameState.board[a] === gameState.board[b] && gameState.board[a] === gameState.board[c]) {
+                    return gameState.board[a];
+                }
+            }
+
+            if (gameState.board.every(cell => cell !== "")) {
+                return "draw";
+            }
+
+            return null;
+        }
+
+        function makeMove(index) {
+            if (!gameState.gameActive || gameState.board[index] !== "") return;
+
+            gameState.board[index] = gameState.currentPlayer;
+            const cell = document.getElementById(`cell-${index}`);
+            const marker = cell.querySelector("span");
+
+            marker.textContent = gameState.currentPlayer;
+            marker.classList.remove("opacity-0");
+            marker.classList.add("opacity-100");
+            
+            if (gameState.currentPlayer === "X") {
+                marker.classList.add("text-primary");
+                cell.classList.add("border-primary", "bg-primary/5");
+            } else {
+                marker.classList.add("text-accent");
+                cell.classList.add("border-accent", "bg-accent/5");
+            }
+
+            cell.classList.add("animate-pop");
+
+            const winner = checkWinner();
+            if (winner) {
+                gameState.gameActive = false;
+                handleGameEnd(winner);
+            } else {
+                gameState.currentPlayer = gameState.currentPlayer === "X" ? "O" : "X";
+                updatePlayerIndicator();
+                
+                if (gameState.gameMode.includes("ai") && gameState.currentPlayer === "O") {
+                    setTimeout(makeAiMove, 500);
+                }
+            }
+
+            updateTimerDisplay();
+        }
+
+        function makeAiMove() {
+            if (!gameState.gameActive || gameState.currentPlayer !== "O") return;
+
+            let availableCells = gameState.board.map((val, idx) => val === "" ? idx : -1).filter(idx => idx !== -1);
+            
+            if (availableCells.length === 0) return;
+
+            let aiMoveIndex;
+            if (gameState.aiDifficulty === "easy") {
+                aiMoveIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+            } else if (gameState.aiDifficulty === "medium") {
+                // Try to block player wins or make random move
+                aiMoveIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+            } else {
+                // Hard AI - more strategic
+                aiMoveIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+            }
+
+            makeMove(aiMoveIndex);
+        }
+
+        function handleGameEnd(result) {
+            const statusElement = document.getElementById("game-status");
+            
+            if (result === "draw") {
+                statusElement.innerHTML = `<p class="text-lg font-semibold text-secondary animate-pulse-slow">Game Draw! No winner this round.</p>`;
+                gameState.scores.draws++;
+            } else {
+                statusElement.innerHTML = `<p class="text-lg font-semibold ${result === "X" ? "text-primary" : "text-accent"} animate-pulse-slow">Player ${result} Wins!</p>`;
+                gameState.scores[result]++;
+            }
+
+            updateScoreDisplay();
+            
+            // Add to history
+            const now = new Date();
+            const dateStr = `${now.getHours()}:${now.getMinutes()}`;
+            gameState.history.unshift({
+                mode: gameState.gameMode,
+                result: result,
+                date: dateStr
+            });
+
+            updateHistoryDisplay();
+            
+            // Highlight winning cells
+            highlightWinningCells();
+        }
+
+        function highlightWinningCells() {
+            // For demonstration, highlight first row
+            for (let i = 0; i < 3; i++) {
+                const cell = document.getElementById(`cell-${i}`);
+                cell.classList.add("bg-yellow-100", "animate-bounce-slow");
+            }
+        }
+
+        function startGame() {
+            if (gameState.gameActive) return;
+
+            resetBoard();
+            gameState.gameActive = true;
+            gameState.currentPlayer = "X";
+            
+            const statusElement = document.getElementById("game-status");
+            statusElement.innerHTML = `<p class="text-lg font-semibold text-gray-700">Game Started! Player X's turn.</p>`;
+
+            updatePlayerIndicator();
+            startTimer();
+        }
+
+        function resetGame() {
+            gameState.board = ["", "", "", "", "", "", "", "", ""];
+            gameState.currentPlayer = "X";
+            gameState.gameActive = false;
+            gameState.scores = { "X": 0, "O": 0, "draws": 0 };
+            gameState.currentRound = 1;
+            gameState.history = [];
+            
+            updateBoardDisplay();
+            updateScoreDisplay();
+            updatePlayerIndicator();
+            updateHistoryDisplay();
+            updateRoundDisplay();
+            
+            const statusElement = document.getElementById("game-status");
+            statusElement.innerHTML = `<p class="text-lg font-semibold text-gray-700">Game Reset. Select mode and start!</p>`;
+            
+            stopTimer();
+        }
+
+        function newRound() {
+            resetBoard();
+            gameState.currentRound++;
+            gameState.gameActive = true;
+            gameState.currentPlayer = "X";
+            
+            updateRoundDisplay();
+            updatePlayerIndicator();
+            
+            const statusElement = document.getElementById("game-status");
+            statusElement.innerHTML = `<p class="text-lg font-semibold text-gray-700">New Round Started! Player X's turn.</p>`;
+            
+            startTimer();
+        }
+
+        function resetBoard() {
+            gameState.board = ["", "", "", "", "", "", "", "", ""];
+            updateBoardDisplay();
+        }
+
+        function updateBoardDisplay() {
+            boardCells.forEach(cell => {
+                const element = document.getElementById(`cell-${cell.id}`);
+                const marker = element.querySelector("span");
+                
+                marker.textContent = "";
+                marker.classList.add("opacity-0");
+                marker.classList.remove("opacity-100", "text-primary", "text-accent");
+                element.classList.remove("border-primary", "border-accent", "bg-primary/5", "bg-accent/5", "bg-yellow-100", "animate-bounce-slow");
+                element.classList.add("border-gray-200");
+            });
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById("player-x-score").textContent = gameState.scores.X;
+            document.getElementById("player-o-score").textContent = gameState.scores.O;
+            
+            const winStatsElements = document.querySelectorAll("#win-stats .text-2xl");
+            winStatsElements[0].textContent = gameState.scores.X;
+            winStatsElements[1].textContent = gameState.scores.O;
+            winStatsElements[2].textContent = gameState.scores.draws;
+        }
+
+        function updatePlayerIndicator() {
+            const indicator = document.getElementById("current-player-indicator").querySelector(".text-xl");
+            indicator.textContent = gameState.currentPlayer;
+            indicator.className = `text-xl font-bold ${gameState.currentPlayer === "X" ? "text-primary" : "text-accent"}`;
+        }
+
+        function updateRoundDisplay() {
+            document.getElementById("current-round").textContent = gameState.currentRound;
+        }
+
+        function updateHistoryDisplay() {
+            document.getElementById("history-list").innerHTML = renderHistoryList();
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById("timer-display").querySelector(".text-xl").textContent = gameState.timer + "s";
+        }
+
+        function startTimer() {
+            if (gameState.timerActive) return;
+            
+            gameState.timerActive = true;
+            gameState.timer = 15;
+            updateTimerDisplay();
+            
+            const timerInterval = setInterval(() => {
+                if (!gameState.gameActive) {
+                    clearInterval(timerInterval);
+                    gameState.timerActive = false;
+                    return;
+                }
+                
+                gameState.timer--;
+                updateTimerDisplay();
+                
+                if (gameState.timer <= 0) {
+                    clearInterval(timerInterval);
+                    gameState.timerActive = false;
+                    
+                    // Switch player if timer expires
+                    gameState.currentPlayer = gameState.currentPlayer === "X" ? "O" : "X";
+                    updatePlayerIndicator();
+                    startTimer();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            gameState.timerActive = false;
+            gameState.timer = 15;
+            updateTimerDisplay();
+        }
+
+        // Initialize Page
+        function initializePage() {
+            // Render all dynamic content
+            document.getElementById("nav-menu").innerHTML = renderNavMenu(navigationItems);
+            document.getElementById("mode-selector").innerHTML = renderModeSelector(gameModes);
+            document.getElementById("player-settings").innerHTML = renderPlayerSettings(playerSettings);
+            document.getElementById("game-actions").innerHTML = renderGameActions(gameActions);
+            document.getElementById("win-stats").innerHTML = renderWinStats(winStatsItems);
+            document.getElementById("ai-difficulty").innerHTML = renderAIDifficulty(aiDifficultyLevels);
+            document.getElementById("features-grid").innerHTML = renderFeatures(featuresList);
+            document.getElementById("instructions-list").innerHTML = renderInstructions(instructionsList);
+            document.getElementById("footer-links").innerHTML = renderFooterLinks(footerLinks);
+            document.getElementById("game-board").innerHTML = renderGameBoard();
+            document.getElementById("history-list").innerHTML = renderHistoryList();
+
+            // Initialize game board cells
+            boardCells.forEach(cell => {
+                const element = document.getElementById(`cell-${cell.id}`);
+                element.addEventListener("click", () => makeMove(cell.id));
+            });
+
+            // Game mode selection
+            document.querySelectorAll("#mode-selector button").forEach(button => {
+                button.addEventListener("click", () => {
+                    gameState.gameMode = button.dataset.mode;
+                    
+                    // Update active state
+                    document.querySelectorAll("#mode-selector button").forEach(b => {
+                        b.classList.remove("border-primary", "bg-primary/5");
+                    });
+                    button.classList.add("border-primary", "bg-primary/5");
+                    
+                    const statusElement = document.getElementById("game-status");
+                    statusElement.innerHTML = `<p class="text-lg font-semibold text-gray-700">Mode set to: ${button.querySelector("span").textContent}</p>`;
+                });
+            });
+
+            // AI difficulty selection
+            document.querySelectorAll("#ai-difficulty button").forEach(button => {
+                button.addEventListener("click", () => {
+                    gameState.aiDifficulty = button.dataset.difficulty;
+                    
+                    // Update active state
+                    document.querySelectorAll("#ai-difficulty button").forEach(b => {
+                        b.classList.remove("bg-primary", "text-white", "border-primary");
+                        b.classList.add("bg-white", "text-gray-800", "border-gray-300");
+                    });
+                    button.classList.add("bg-primary", "text-white", "border-primary");
+                });
+            });
+
+            // Game actions
+            document.getElementById("start-game").addEventListener("click", startGame);
+            document.getElementById("reset-game").addEventListener("click", resetGame);
+            document.getElementById("new-round").addEventListener("click", newRound);
+
+            // Player name updates
+            document.getElementById("player-x-name").addEventListener("input", function() {
+                const xScoreLabel = document.querySelector("#player-x-score").previousElementSibling;
+                xScoreLabel.textContent = this.value || "Player X";
+            });
+            
+            document.getElementById("player-o-name").addEventListener("input", function() {
+                const oScoreLabel = document.querySelector("#player-o-score").previousElementSibling;
+                oScoreLabel.textContent = this.value || "Player O";
+            });
+
+            // Navigation link handling
+            document.addEventListener("click", function(event) {
+                const link = event.target.closest("a[href^='#']");
+                if (!link) return;
+                event.preventDefault();
+                const targetId = link.getAttribute("href").substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            });
+
+            // Initialize scores and timer
+            updateScoreDisplay();
+            updatePlayerIndicator();
+            updateTimerDisplay();
+        }
+
+        // Start initialization when DOM is ready
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializePage);
+        } else {
+            initializePage();
+        }
+    </script>
+</body>
+</html>
