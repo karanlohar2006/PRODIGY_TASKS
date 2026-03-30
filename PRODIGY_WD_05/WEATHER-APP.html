@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherSphere | Dynamic Weather App</title>
+    <meta name="description" content="Professional weather application with real-time data, animations, and location-based forecasting">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        @keyframes weatherFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+        @keyframes rotateSun {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes cloudMove {
+            0% { transform: translateX(-20px); }
+            100% { transform: translateX(20px); }
+        }
+        @keyframes rainDrop {
+            0% { transform: translateY(-20px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(100px); opacity: 0; }
+        }
+        .animate-fadeInUp { animation: fadeInUp 0.8s ease-out; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .animate-weatherFloat { animation: weatherFloat 3s ease-in-out infinite; }
+        .animate-rotateSun { animation: rotateSun 10s linear infinite; }
+        .animate-cloudMove { animation: cloudMove 8s ease-in-out infinite alternate; }
+        .animate-rainDrop { animation: rainDrop 1.5s linear infinite; }
+        .weather-bg-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .temp-gradient {
+            background: linear-gradient(to right, #f8b400, #f86c00);
+        }
+        .card-shadow {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, impact: 0.1);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 font-['Inter'] text-white">
+    <header class="sticky top-0 z-50 glass-effect">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-cloud-sun text-3xl animate-weatherFloat"></i>
+                    <h1 class="text-2xl font-bold">WeatherSphere</h1>
+                </div>
+                <ul id="nav-items" class="flex space-x-6"></ul>
+                <button id="theme-toggle" class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <!-- Location Search Section -->
+        <section class="mb-12 animate-fadeInUp">
+            <div class="max-w-2xl mx-auto">
+                <div class="glass-effect rounded-2xl p-8 card-shadow">
+                    <h2 class="text-3xl font-bold mb-6">Find Weather Forecast</h2>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <label class="block mb-2 font-semibold">Search by City Name</label>
+                            <div class="relative">
+                                <input type="text" id="city-input" placeholder="Enter city name (e.g., London, Tokyo)" 
+                                       class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-white/40">
+                                <button id="search-btn" class="absolute right-2 top-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-all">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <label class="block mb-2 font-semibold">Use Your Location</label>
+                            <button id="location-btn" class="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 rounded-lg flex items-center justify-center gap-2 transition-all">
+                                <i class="fas fa-location-arrow"></i>
+                                Get Current Location Weather
+                            </button>
+                        </div>
+                    </div>
+                    <div id="search-history" class="mt-6"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Current Weather Display -->
+        <section class="mb-12">
+            <div id="weather-display" class="max-w-4xl mx-auto glass-effect rounded-2xl p-8 card-shadow animate-fadeInUp">
+                <!-- Weather data will be dynamically injected here -->
+            </div>
+        </section>
+
+        <!-- Weather Details Cards -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-center">Detailed Weather Information</h2>
+            <div id="weather-details" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </section>
+
+        <!-- Forecast Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">5-Day Forecast</h2>
+            <div id="forecast-container" class="flex flex-col lg:flex-row gap-6"></div>
+        </section>
+
+        <!-- Weather Visualization -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">Weather Visualization</h2>
+            <div class="glass-effect rounded-2xl p-6">
+                <div id="weather-visual" class="flex flex-col md:flex-row items-center justify-between">
+                    <!-- Visualization elements will be dynamically injected -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6">Location Map</h2>
+            <div class="glass-effect rounded-2xl p-6">
+                <div id="map-container" class="h-64 rounded-lg overflow-hidden relative">
+                    <!-- Map placeholder -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-400 to-green-400 flex items-center justify-center">
+                        <i class="fas fa-map-marked-alt text-4xl animate-pulse"></i>
+                        <p class="ml-4">Interactive map loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="glass-effect mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-cloud-sun text-2xl"></i>
+                        <h3 class="text-xl font-bold">WeatherSphere</h3>
+                    </div>
+                    <p class="text-white/70 mt-2">Professional weather forecasting platform</p>
+                </div>
+                <div id="footer-links" class="flex flex-wrap gap-6"></div>
+                <div class="mt-6 md:mt-0">
+                    <p class="text-white/70">Data powered by OpenWeatherMap API</p>
+                    <p class="text-sm text-white/50 mt-1">© 2023 WeatherSphere. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 glass-effect rounded-lg p-4 shadow-lg transform translate-y-full opacity-0 transition-all duration-300">
+        <div class="flex items-center">
+            <i id="toast-icon" class="mr-3"></i>
+            <p id="toast-message"></p>
+        </div>
+    </div>
+
+    <script>
+        // Data Layer
+        const navigationItems = [
+            { "label": "Home", "href": "#", "icon": "fas fa-home" },
+            { "label": "Forecast", "href": "#forecast", "icon": "fas fa-calendar-alt" },
+            { "label": "Maps", "href": "#maps", "icon": "fas fa-map" },
+            { "label": "Radar", "href": "#radar", "icon": "fas fa-satellite" },
+            { "label": "Alerts", "href": "#alerts", "icon": "fas fa-bell" }
+        ];
+
+        const footerLinks = [
+            { "label": "Privacy Policy", "href": "#privacy" },
+            { "label": "Terms of Service", "href": "#terms" },
+            { "label": "API Documentation", "href": "#api" },
+            { "label": "Contact Support", "href": "#contact" },
+            { "label": "About Us", "href": "#about" }
+        ];
+
+        const weatherConditions = [
+            { "name": "Clear", "icon": "fas fa-sun", "color": "#f8b400", "animation": "animate-rotateSun" },
+            { "name": "Clouds", "icon": "fas fa-cloud", "color": "#a0aec0", "animation": "animate-cloudMove" },
+            { "name": "Rain", "icon": "fas fa-cloud-rain", "color": "#667eea", "animation": "animate-rainDrop" },
+            { "name": "Snow", "icon": "fas fa-snowflake", "color": "#63b3ed", "animation": "" },
+            { "name": "Thunderstorm", "icon": "fas fa-bolt", "color": "#f56565", "animation": "animate-pulse" },
+            { "name": "Mist", "icon": "fas fa-smog", "color": "#cbd5e0", "animation": "" }
+        ];
+
+        const sampleWeatherData = {
+            "city": "New York",
+            "country": "US",
+            "temp": 22,
+            "temp_min": 18,
+            "temp_max": 26,
+            "feels_like": 23,
+            "humidity": 65,
+            "pressure": 1013,
+            "wind_speed": 5.2,
+            "wind_dir": "NE",
+            "visibility": 10000,
+            "clouds": 40,
+            "condition": "Clouds",
+            "description": "Partly cloudy",
+            "icon": "fas fa-cloud",
+            "sunrise": "06:45",
+            "sunset": "19:30",
+            "timestamp": "2023-10-15 14:30",
+            "units": { "temp": "°C", "speed": "km/h", "pressure": "hPa" }
+        };
+
+        const forecastData = [
+            { "day": "Mon", "date": "Oct 16", "temp": 24, "condition": "Clear", "icon": "fas fa-sun", "precip": "10%" },
+            { "day": "Tue", "date": "Oct 17", "temp": 21, "condition": "Clouds", "icon": "fas fa-cloud", "precip": "30%" },
+            { "day": "Wed", "date": "Oct 18", "temp": 19, "condition": "Rain", "icon": "fas fa-cloud-rain", "precip": "80%" },
+            { "day": "Thu", "date": "Oct 19", "temp": 22, "condition": "Clear", "icon": "fas fa-sun", "precip": "5%" },
+            { "day": "Fri", "date": "Oct 20", "temp": 20, "condition": "Clouds", "icon": "fas fa-cloud", "precip": "20%" }
+        ];
+
+        const weatherDetails = [
+            { "title": "Humidity", "value": "65%", "icon": "fas fa-tint", "color": "text-blue-400", "desc": "Relative humidity level" },
+            { "title": "Wind Speed", "value": "5.2 km/h", "icon": "fas fa-wind", "color": "text-green-400", "desc": "Current wind velocity" },
+            { "title": "Pressure", "value": "1013 hPa", "icon": "fas fa-compress-alt", "color": "text-purple-400", "desc": "Atmospheric pressure" },
+            { "title": "Visibility", "value": "10 km", "icon": "fas fa-eye", "color": "text-yellow-400", "desc": "Visibility distance" },
+            { "title": "UV Index", "value": "5", "icon": "fas fa-sun", "color": "text-orange-400", "desc": "Ultraviolet radiation level" },
+            { "title": "Precipitation", "value": "30%", "icon": "fas fa-cloud-rain", "color": "text-indigo-400", "desc": "Chance of rain" },
+            { "title": "Sunrise", "value": "06:45 AM", "icon": "fas fa-sunrise", "color": "text-red-400", "desc": "Sunrise time" },
+            { "title": "Sunset", "value": "19:30 PM", "icon": "fas fa-sunset", "color": "text-pink-400", "desc": "Sunset time" }
+        ];
+
+        const searchHistory = [
+            { "city": "London", "country": "UK", "temp": 15, "condition": "Rain" },
+            { "city": "Tokyo", "country": "Japan", "temp": 25, "condition": "Clear" },
+            { "city": "Paris", "country": "France", "temp": 18, "condition": "Clouds" },
+            { "city": "Sydney", "country": "Australia", "temp": 28, "condition": "Clear" }
+        ];
+
+        // Render Functions
+        function renderNavItems(items) {
+            return items.map(item => 
+                `<li class="relative group">
+                    <a href="${item.href}" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all">
+                        <i class="${item.icon}"></i>
+                        <span>${item.label}</span>
+                    </a>
+                    <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-400 transform scale-x-0 group-hover:scale-x-100 transition-transform"></div>
+                </li>`
+            ).join("");
+        }
+
+        function renderFooterLinks(items) {
+            return items.map(item => 
+                `<a href="${item.href}" class="text-white/70 hover:text-white transition-colors">${item.label}</a>`
+            ).join("");
+        }
+
+        function renderWeatherDisplay(data) {
+            const condition = weatherConditions.find(c => c.name === data.condition) || weatherConditions[0];
+            return `
+                <div class="flex flex-col lg:flex-row items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-6">
+                            <i class="${condition.icon} text-5xl ${condition.animation} mr-4" style="color: ${condition.color}"></i>
+                            <div>
+                                <h3 class="text-4xl font-bold">${data.city}, ${data.country}</h3>
+                                <p class="text-xl text-white/80">${data.description}</p>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <div class="flex items-center">
+                                <div class="temp-gradient rounded-full p-4 animate-pulse">
+                                    <span class="text-6xl font-bold">${data.temp}</span>
+                                    <span class="text-2xl">${data.units.temp}</span>
+                                </div>
+                                <div class="ml-6">
+                                    <p class="text-lg">Feels like <span class="font-bold">${data.feels_like}${data.units.temp}</span></p>
+                                    <p class="text-lg">Min/Max: <span class="font-bold">${data.temp_min}/${data.temp_max}${data.units.temp}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-white/70">Last updated: ${data.timestamp}</p>
+                    </div>
+                    <div class="flex-1 mt-6 lg:mt-0">
+                        <div class="glass-effect rounded-xl p-6">
+                            <h4 class="text-xl font-bold mb-4">Current Conditions</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-wind text-blue-400 mr-3"></i>
+                                    <div>
+                                        <p class="font-semibold">Wind</p>
+                                        <p>${data.wind_speed} ${data.units.speed} ${data.wind_dir}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-tint text-blue-400 mr-3"></i>
+                                    <div>
+                                        <p class="font-semibold">Humidity</p>
+                                        <p>${data.humidity}%</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-compress-alt text-purple-400 mr-3"></i>
+                                    <div>
+                                        <p class="font-semibold">Pressure</p>
+                                        <p>${data.pressure} ${data.units.pressure}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-eye text-yellow-400 mr-3"></i>
+                                    <div>
+                                        <p class="font-semibold">Visibility</p>
+                                        <p>${data.visibility / 1000} km</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWeatherDetails(items) {
+            return items.map(item => 
+                `<div class="glass-effect rounded-xl p-6 animate-fadeInUp">
+                    <div class="flex items-center mb-4">
+                        <i class="${item.icon} ${item.color} text-2xl mr-3"></i>
+                        <h3 class="text-lg font-bold">${item.title}</h3>
+                    </div>
+                    <p class="text-2xl font-bold mb-2">${item.value}</p>
+                    <p class="text-white/70">${item.desc}</p>
+                </div>`
+            ).join("");
+        }
+
+        function renderForecast(items) {
+            return `
+                <div class="flex-1">
+                    <div class="glass-effect rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-4">Detailed Forecast</h3>
+                        ${items.map(item => 
+                            `<div class="flex items-center justify-between py-4 border-b border-white/10">
+                                <div class="flex items-center">
+                                    <span class="font-bold text-lg mr-4">${item.day}</span>
+                                    <span class="text-white/70">${item.date}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="${item.icon} mr-3" style="color: ${weatherConditions.find(c => c.name === item.condition)?.color || '#ffffff'}"></i>
+                                    <span class="font-bold">${item.temp}°</span>
+                                </div>
+                                <div>
+                                    <span class="text-white/70">${item.precip}</span>
+                                </div>
+                            </div>`
+                        ).join("")}
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <div class="glass-effect rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-4">Temperature Trend</h3>
+                        <div class="h-64 flex items-end justify-between">
+                            ${items.map(item => 
+                                `<div class="flex flex-col items-center">
+                                    <div class="w-10 bg-gradient-to-t from-orange-400 to-red-400 rounded-t-lg" style="height: ${item.temp * 8}px"></div>
+                                    <span class="mt-2 font-bold">${item.temp}°</span>
+                                    <span class="text-white/70">${item.day}</span>
+                                </div>`
+                            ).join("")}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderWeatherVisual(data) {
+            const condition = weatherConditions.find(c => c.name === data.condition);
+            return `
+                <div class="flex-1 mb-6 md:mb-0">
+                    <div class="relative h-48">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="${condition.icon} text-8xl ${condition.animation}" style="color: ${condition.color}"></i>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 bg-white/10 rounded-lg p-4">
+                            <p class="text-center font-bold">${data.condition} Visualization</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <div class="glass-effect rounded-xl p-6">
+                        <h3 class="text-xl font-bold mb-4">Weather Metrics</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span>Temperature</span>
+                                <div class="flex items-center">
+                                    <div class="w-32 h-3 bg-gradient-to-r from-blue-400 to-red-400 rounded-full overflow-hidden">
+                                        <div class="h-full bg-red-400" style="width: ${((data.temp - data.temp_min) / (data.temp_max - data.temp_min)) * 100}%"></div>
+                                    </div>
+                                    <span class="ml-2 font-bold">${data.temp}°</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Humidity</span>
+                                <div class="flex items-center">
+                                    <div class="w-32 h-3 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full overflow-hidden">
+                                        <div class="h-full bg-blue-600" style="width: ${data.humidity}%"></div>
+                                    </div>
+                                    <span class="ml-2 font-bold">${data.humidity}%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Cloud Coverage</span>
+                                <div class="flex items-center">
+                                    <div class="w-32 h-3 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gray-600" style="width: ${data.clouds}%"></div>
+                                    </div>
+                                    <span class="ml-2 font-bold">${data.clouds}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSearchHistory(items) {
+            if (!items.length) return "";
+            return `
+                <h3 class="text-lg font-bold mb-4">Recent Searches</h3>
+                <div class="flex flex-wrap gap-3">
+                    ${items.map(item => 
+                        `<button class="glass-effect px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-white/20 transition-all">
+                            <i class="fas fa-history"></i>
+                            <span>${item.city}</span>
+                            <span class="text-white/70">${item.temp}°</span>
+                            <span class="text-xs">${item.condition}</span>
+                        </button>`
+                    ).join("")}
+                </div>
+            `;
+        }
+
+        // Toast Notification System
+        function showToast(message, type = "info") {
+            const toast = document.getElementById("toast");
+            const toastIcon = document.getElementById("toast-icon");
+            const toastMessage = document.getElementById("toast-message");
+            
+            toastIcon.className = type === "success" ? "fas fa-check-circle text-green-400" : 
+                                 type === "error" ? "fas fa-exclamation-circle text-red-400" : 
+                                 "fas fa-info-circle text-blue-400";
+            toastMessage.textContent = message;
+            
+            toast.classList.remove("translate-y-full", "opacity-0");
+            toast.classList.add("translate-y-0", "opacity-100");
+            
+            setTimeout(() => {
+                toast.classList.remove("translate-y-0", "opacity-100");
+                toast.classList.add("translate-y-full", "opacity-0");
+            }, 3000);
+        }
+
+        // Initialize App
+        function initWeatherApp() {
+            // Render navigation
+            document.getElementById("nav-items").innerHTML = renderNavItems(navigationItems);
+            
+            // Render footer links
+            document.getElementById("footer-links").innerHTML = renderFooterLinks(footerLinks);
+            
+            // Render initial weather data
+            document.getElementById("weather-display").innerHTML = renderWeatherDisplay(sampleWeatherData);
+            
+            // Render weather details
+            document.getElementById("weather-details").innerHTML = renderWeatherDetails(weatherDetails);
+            
+            // Render forecast
+            document.getElementById("forecast-container").innerHTML = renderForecast(forecastData);
+            
+            // Render weather visualization
+            document.getElementById("weather-visual").innerHTML = renderWeatherVisual(sampleWeatherData);
+            
+            // Render search history
+            document.getElementById("search-history").innerHTML = renderSearchHistory(searchHistory);
+            
+            // Set up event listeners
+            document.getElementById("search-btn").addEventListener("click", handleSearch);
+            document.getElementById("location-btn").addEventListener("click", handleLocation);
+            document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+            
+            // Simulate API fetch with sample data
+            showToast("Weather data loaded successfully", "success");
+        }
+
+        // Event Handlers
+        function handleSearch() {
+            const cityInput = document.getElementById("city-input");
+            const city = cityInput.value.trim();
+            
+            if (!city) {
+                showToast("Please enter a city name", "error");
+                return;
+            }
+            
+            showToast(`Fetching weather data for ${city}...`, "info");
+            
+            // Simulate API call delay
+            setTimeout(() => {
+                const mockData = {
+                    ...sampleWeatherData,
+                    city: city,
+                    temp: Math.floor(Math.random() * 30) + 10,
+                    condition: weatherConditions[Math.floor(Math.random() * weatherConditions.length)].name,
+                    description: `Weather in ${city}`,
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                document.getElementById("weather-display").innerHTML = renderWeatherDisplay(mockData);
+                document.getElementById("weather-visual").innerHTML = renderWeatherVisual(mockData);
+                
+                // Add to search history
+                if (!searchHistory.find(item => item.city === city)) {
+                    searchHistory.unshift({
+                        city: city,
+                        country: "Unknown",
+                        temp: mockData.temp,
+                        condition: mockData.condition
+                    });
+                    document.getElementById("search-history").innerHTML = renderSearchHistory(searchHistory);
+                }
+                
+                showToast(`Weather data for ${city} updated`, "success");
+                cityInput.value = "";
+            }, 1000);
+        }
+
+        function handleLocation() {
+            showToast("Getting your location...", "info");
+            
+            // Simulate location detection delay
+            setTimeout(() => {
+                const mockData = {
+                    ...sampleWeatherData,
+                    city: "Your Location",
+                    temp: Math.floor(Math.random() * 25) + 15,
+                    condition: weatherConditions[Math.floor(Math.random() * weatherConditions.length)].name,
+                    description: "Weather at your current location",
+                    timestamp: new Date().toLocaleString()
+                };
+                
+                document.getElementById("weather-display").innerHTML = renderWeatherDisplay(mockData);
+                document.getElementById("weather-visual").innerHTML = renderWeatherVisual(mockData);
+                
+                showToast("Location weather data loaded", "success");
+            }, 1500);
+        }
+
+        function toggleTheme() {
+            const themeToggle = document.getElementById("theme-toggle");
+            const icon = themeToggle.querySelector("i");
+            const body = document.body;
+            
+            if (body.classList.contains("bg-gradient-to-br")) {
+                body.classList.remove("bg-gradient-to-br", "from-blue-900", "via-purple-900", "to-indigo-900");
+                body.classList.add("bg-gray-900");
+                icon.className = "fas fa-sun";
+                showToast("Dark theme activated", "info");
+            } else {
+                body.classList.remove("bg-gray-900");
+                body.classList.add("bg-gradient-to-br", "from-blue-900", "via-purple-900", "to-indigo-900");
+                icon.className = "fas fa-moon";
+                showToast("Default theme activated", "info");
+            }
+        }
+
+        // Delegated event handling
+        document.addEventListener("click", function(event) {
+            // Handle navigation links
+            if (event.target.closest("a[href^='#']")) {
+                const link = event.target.closest("a[href^='#']");
+                const targetId = link.getAttribute("href").substring(1);
+                const targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: "smooth" });
+                }
+            }
+            
+            // Handle search history buttons
+            if (event.target.closest("#search-history button")) {
+                const button = event.target.closest("#search-history button");
+                const city = button.querySelector("span").textContent;
+                document.getElementById("city-input").value = city;
+                handleSearch();
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener("DOMContentLoaded", initWeatherApp);
+    </script>
+</body>
+</html>
