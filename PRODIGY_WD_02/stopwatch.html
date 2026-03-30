@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch Application</title>
+    <meta name="description" content="Interactive stopwatch web application with lap time tracking">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3b82f6",
+                        secondary: "#1e40af",
+                        accent: "#10b981",
+                        dark: "#1f2937",
+                        light: "#f9fafb"
+                    },
+                    fontFamily: {
+                        'mono': ['"SF Mono"', 'Monaco', '"Andale Mono"', '"Ubuntu Mono"', 'monospace']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .digit {
+            transition: all 0.2s ease;
+        }
+        .lap-item {
+            transition: all 0.3s ease;
+        }
+        .lap-item:hover {
+            transform: translateX(4px);
+        }
+        .glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-dark text-white font-sans">
+    <header class="container mx-auto px-4 py-8">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Stopwatch</h1>
+            <p class="text-gray-300 text-lg">Precision time tracking with lap recording</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-4">
+        <div class="max-w-4xl mx-auto">
+            <!-- Stopwatch Display -->
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 md:p-8 mb-8 border border-gray-700/50">
+                <div class="flex flex-col items-center">
+                    <div class="mb-8">
+                        <div id="stopwatch-display" class="text-center">
+                            <div class="flex justify-center items-baseline mb-2">
+                                <span id="hours" class="text-7xl md:text-8xl font-mono font-bold digit">00</span>
+                                <span class="text-7xl md:text-8xl font-mono font-bold mx-1">:</span>
+                                <span id="minutes" class="text-7xl md:text-8xl font-mono font-bold digit">00</span>
+                                <span class="text-7xl md:text-8xl font-mono font-bold mx-1">:</span>
+                                <span id="seconds" class="text-7xl md:text-8xl font-mono font-bold digit">00</span>
+                                <span class="text-5xl md:text-6xl font-mono font-bold ml-2">.</span>
+                                <span id="milliseconds" class="text-5xl md:text-6xl font-mono font-bold digit">00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div id="control-buttons" class="flex flex-wrap justify-center gap-4 mb-8">
+                        <!-- Buttons will be rendered from JavaScript -->
+                    </div>
+
+                    <!-- Lap Section -->
+                    <div class="w-full">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-2xl font-bold">Lap Times</h2>
+                            <div class="text-gray-400">
+                                <span id="lap-count">0</span> laps recorded
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700/30">
+                            <div id="lap-header" class="grid grid-cols-12 gap-4 text-gray-400 text-sm font-medium mb-3 px-2">
+                                <div class="col-span-1">#</div>
+                                <div class="col-span-5">Lap Time</div>
+                                <div class="col-span-5">Total Time</div>
+                                <div class="col-span-1"></div>
+                            </div>
+                            
+                            <div id="lap-times-container" class="max-h-80 overflow-y-auto pr-2">
+                                <!-- Lap items will be rendered from JavaScript -->
+                                <div id="empty-laps-message" class="text-center py-10 text-gray-500">
+                                    <i class="fas fa-flag text-3xl mb-3"></i>
+                                    <p class="text-lg">No lap times recorded yet</p>
+                                    <p class="text-sm mt-1">Click "Lap" to record your first lap time</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="bg-gray-800/30 rounded-xl p-6 border border-gray-700/30">
+                <h3 class="text-xl font-bold mb-4">How to Use</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex items-start">
+                        <div class="bg-primary/20 p-3 rounded-lg mr-4">
+                            <i class="fas fa-play text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Start</h4>
+                            <p class="text-gray-300 text-sm">Begin timing. The stopwatch will continue running until paused.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="bg-accent/20 p-3 rounded-lg mr-4">
+                            <i class="fas fa-pause text-accent text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Pause</h4>
+                            <p class="text-gray-300 text-sm">Temporarily stop timing. Resume with Start button.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="bg-red-500/20 p-3 rounded-lg mr-4">
+                            <i class="fas fa-flag text-red-500 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold mb-1">Lap</h4>
+                            <p class="text-gray-300 text-sm">Record current time while stopwatch continues running.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container mx-auto px-4 py-8 mt-12">
+        <div class="text-center text-gray-400 text-sm">
+            <p>Stopwatch Web Application &copy; <span id="current-year">2024</span> | Built with HTML, CSS & JavaScript</p>
+            <p class="mt-2">Precision timing for workouts, cooking, presentations, and more.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Data layer
+        const stopwatchState = {
+            running: false,
+            startTime: 0,
+            elapsedTime: 0,
+            lastLapTime: 0,
+            laps: []
+        };
+
+        const controlButtons = [
+            { 
+                id: "start-btn", 
+                label: "Start", 
+                icon: "fas fa-play", 
+                color: "bg-primary hover:bg-blue-600", 
+                action: "startStopwatch",
+                visibleStates: ["stopped", "paused"]
+            },
+            { 
+                id: "pause-btn", 
+                label: "Pause", 
+                icon: "fas fa-pause", 
+                color: "bg-yellow-500 hover:bg-yellow-600", 
+                action: "pauseStopwatch",
+                visibleStates: ["running"]
+            },
+            { 
+                id: "reset-btn", 
+                label: "Reset", 
+                icon: "fas fa-stop", 
+                color: "bg-gray-700 hover:bg-gray-800", 
+                action: "resetStopwatch",
+                visibleStates: ["stopped", "paused", "running"]
+            },
+            { 
+                id: "lap-btn", 
+                label: "Lap", 
+                icon: "fas fa-flag", 
+                color: "bg-accent hover:bg-emerald-600", 
+                action: "recordLap",
+                visibleStates: ["running"]
+            }
+        ];
+
+        // DOM Elements
+        let hoursElement, minutesElement, secondsElement, millisecondsElement;
+        let controlButtonsContainer, lapTimesContainer, emptyLapsMessage, lapCountElement;
+        let animationFrameId;
+
+        // Initialize DOM elements
+        function initializeDOMElements() {
+            hoursElement = document.getElementById("hours");
+            minutesElement = document.getElementById("minutes");
+            secondsElement = document.getElementById("seconds");
+            millisecondsElement = document.getElementById("milliseconds");
+            controlButtonsContainer = document.getElementById("control-buttons");
+            lapTimesContainer = document.getElementById("lap-times-container");
+            emptyLapsMessage = document.getElementById("empty-laps-message");
+            lapCountElement = document.getElementById("lap-count");
+        }
+
+        // Reusable render functions
+        function renderControlButtons() {
+            const currentState = stopwatchState.running ? "running" : 
+                                (stopwatchState.elapsedTime > 0 ? "paused" : "stopped");
+            
+            const buttonsHTML = controlButtons
+                .filter(button => button.visibleStates.includes(currentState))
+                .map(button => `
+                    <button 
+                        id="${button.id}" 
+                        class="${button.color} text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-3 min-w-[140px] shadow-lg"
+                        onclick="${button.action}()"
+                    >
+                        <i class="${button.icon}"></i>
+                        <span>${button.label}</span>
+                    </button>
+                `).join("");
+            
+            controlButtonsContainer.innerHTML = buttonsHTML;
+        }
+
+        function renderLapTimes() {
+            if (stopwatchState.laps.length === 0) {
+                emptyLapsMessage.style.display = "block";
+                lapTimesContainer.innerHTML = "";
+                lapCountElement.textContent = "0";
+                return;
+            }
+            
+            emptyLapsMessage.style.display = "none";
+            
+            const lapsHTML = stopwatchState.laps.map((lap, index) => {
+                const lapNumber = stopwatchState.laps.length - index;
+                const lapTimeFormatted = formatTime(lap.lapTime);
+                const totalTimeFormatted = formatTime(lap.totalTime);
+                
+                return `
+                    <div class="lap-item grid grid-cols-12 gap-4 py-3 px-2 rounded-lg mb-2 bg-gray-800/30 hover:bg-gray-800/50">
+                        <div class="col-span-1 font-bold text-primary">${lapNumber}</div>
+                        <div class="col-span-5 font-mono text-lg">${lapTimeFormatted}</div>
+                        <div class="col-span-5 font-mono text-lg">${totalTimeFormatted}</div>
+                        <div class="col-span-1 flex justify-end">
+                            <button 
+                                onclick="removeLap(${index})" 
+                                class="text-gray-400 hover:text-red-500 transition-colors"
+                                aria-label="Remove lap"
+                            >
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+            
+            lapTimesContainer.innerHTML = lapsHTML;
+            lapCountElement.textContent = stopwatchState.laps.length;
+        }
+
+        // Utility functions
+        function formatTime(milliseconds) {
+            const hrs = Math.floor(milliseconds / 3600000);
+            const mins = Math.floor((milliseconds % 3600000) / 60000);
+            const secs = Math.floor((milliseconds % 60000) / 1000);
+            const ms = Math.floor((milliseconds % 1000) / 10);
+            
+            return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay(time) {
+            const hrs = Math.floor(time / 3600000);
+            const mins = Math.floor((time % 3600000) / 60000);
+            const secs = Math.floor((time % 60000) / 1000);
+            const ms = Math.floor((time % 1000) / 10);
+            
+            hoursElement.textContent = hrs.toString().padStart(2, '0');
+            minutesElement.textContent = mins.toString().padStart(2, '0');
+            secondsElement.textContent = secs.toString().padStart(2, '0');
+            millisecondsElement.textContent = ms.toString().padStart(2, '0');
+            
+            // Add pulse animation to digits when running
+            if (stopwatchState.running) {
+                [hoursElement, minutesElement, secondsElement, millisecondsElement].forEach(el => {
+                    el.classList.add('animate-pulse-slow');
+                });
+            } else {
+                [hoursElement, minutesElement, secondsElement, millisecondsElement].forEach(el => {
+                    el.classList.remove('animate-pulse-slow');
+                });
+            }
+        }
+
+        function updateStopwatch() {
+            if (!stopwatchState.running) return;
+            
+            const currentTime = Date.now();
+            stopwatchState.elapsedTime = currentTime - stopwatchState.startTime;
+            
+            updateDisplay(stopwatchState.elapsedTime);
+            animationFrameId = requestAnimationFrame(updateStopwatch);
+        }
+
+        // Stopwatch control functions
+        function startStopwatch() {
+            if (!stopwatchState.running) {
+                if (stopwatchState.elapsedTime === 0) {
+                    // Starting fresh
+                    stopwatchState.startTime = Date.now();
+                } else {
+                    // Resuming from pause
+                    stopwatchState.startTime = Date.now() - stopwatchState.elapsedTime;
+                }
+                
+                stopwatchState.running = true;
+                updateStopwatch();
+                renderControlButtons();
+                
+                // Add glow effect to display
+                document.getElementById("stopwatch-display").classList.add("glow");
+            }
+        }
+
+        function pauseStopwatch() {
+            if (stopwatchState.running) {
+                stopwatchState.running = false;
+                cancelAnimationFrame(animationFrameId);
+                renderControlButtons();
+                
+                // Remove glow effect
+                document.getElementById("stopwatch-display").classList.remove("glow");
+            }
+        }
+
+        function resetStopwatch() {
+            stopwatchState.running = false;
+            stopwatchState.startTime = 0;
+            stopwatchState.elapsedTime = 0;
+            stopwatchState.lastLapTime = 0;
+            stopwatchState.laps = [];
+            
+            cancelAnimationFrame(animationFrameId);
+            updateDisplay(0);
+            renderControlButtons();
+            renderLapTimes();
+            
+            // Remove glow effect
+            document.getElementById("stopwatch-display").classList.remove("glow");
+        }
+
+        function recordLap() {
+            if (!stopwatchState.running) return;
+            
+            const currentTotalTime = stopwatchState.elapsedTime;
+            const lapTime = stopwatchState.lastLapTime === 0 ? 
+                currentTotalTime : 
+                currentTotalTime - stopwatchState.lastLapTime;
+            
+            stopwatchState.laps.unshift({
+                lapTime: lapTime,
+                totalTime: currentTotalTime,
+                timestamp: Date.now()
+            });
+            
+            stopwatchState.lastLapTime = currentTotalTime;
+            renderLapTimes();
+            
+            // Visual feedback for lap recording
+            const lapBtn = document.getElementById("lap-btn");
+            lapBtn.classList.add("bg-emerald-700");
+            setTimeout(() => {
+                lapBtn.classList.remove("bg-emerald-700");
+            }, 200);
+        }
+
+        function removeLap(index) {
+            stopwatchState.laps.splice(index, 1);
+            
+            // If we removed the most recent lap, update lastLapTime
+            if (index === 0 && stopwatchState.laps.length > 0) {
+                stopwatchState.lastLapTime = stopwatchState.laps[0].totalTime;
+            } else if (stopwatchState.laps.length === 0) {
+                stopwatchState.lastLapTime = 0;
+            }
+            
+            renderLapTimes();
+        }
+
+        // Keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener("keydown", (e) => {
+                // Prevent shortcuts when user might be typing
+                if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+                
+                switch(e.key) {
+                    case " ":
+                    case "s":
+                        e.preventDefault();
+                        if (stopwatchState.running) {
+                            pauseStopwatch();
+                        } else {
+                            startStopwatch();
+                        }
+                        break;
+                    case "r":
+                        e.preventDefault();
+                        resetStopwatch();
+                        break;
+                    case "l":
+                        e.preventDefault();
+                        if (stopwatchState.running) {
+                            recordLap();
+                        }
+                        break;
+                    case "Escape":
+                        e.preventDefault();
+                        pauseStopwatch();
+                        break;
+                }
+            });
+        }
+
+        // Initialize application
+        function initializeApp() {
+            initializeDOMElements();
+            renderControlButtons();
+            renderLapTimes();
+            setupKeyboardShortcuts();
+            
+            // Set current year in footer
+            document.getElementById("current-year").textContent = new Date().getFullYear();
+            
+            // Initial display update
+            updateDisplay(0);
+        }
+
+        // Start the application when DOM is loaded
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializeApp);
+        } else {
+            initializeApp();
+        }
+    </script>
+</body>
+</html>
