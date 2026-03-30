@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karan Lohar | Web Developer Portfolio</title>
+    <meta name="description" content="Portfolio website showcasing skills, projects, and accomplishments of Karan Lohar, a passionate web developer.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#2563eb",
+                        secondary: "#7c3aed",
+                        accent: "#f59e0b",
+                        dark: "#1e293b",
+                        light: "#f8fafc"
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'poppins': ['Poppins', 'sans-serif']
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-in-out',
+                        'slide-up': 'slideUp 0.6s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+        .skill-bar {
+            transition: width 1.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white font-inter text-gray-800">
+    <!-- Navigation -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-dark">
+                    <span class="text-primary">Karan</span>Lohar
+                </div>
+                <ul id="nav-menu" class="hidden md:flex space-x-8"></ul>
+                <button id="mobile-menu-btn" class="md:hidden text-dark">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
+                <ul id="mobile-nav-items" class="space-y-3"></ul>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="gradient-bg text-white py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="md:w-1/2 animate-fade-in">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4 font-poppins">
+                        Hi, I'm <span class="text-accent">Karan Lohar</span>
+                    </h1>
+                    <p class="text-xl mb-6 text-gray-100">
+                        Passionate Web Developer & IT Student
+                    </p>
+                    <p class="text-lg mb-8 text-gray-200">
+                        I create modern, responsive websites and applications that solve real-world problems. Currently pursuing BSc IT at Jai Hind College, Mumbai.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#projects" class="bg-accent text-dark font-semibold px-6 py-3 rounded-lg hover:bg-yellow-500 transition duration-300">
+                            View My Work
+                        </a>
+                        <a href="#contact" class="border-2 border-white text-white font-semibold px-6 py-3 rounded-lg hover:bg-white hover:text-primary transition duration-300">
+                            Contact Me
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center animate-slide-up">
+                    <div class="relative">
+                        <div class="w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+                            <img src="https://t3.ftcdn.net/jpg/06/01/17/18/360_F_601171862_l7yZ0wujj8o2SowiKTUsfLEEx8KunYNd.jpg" alt="Karan Lohar - Professional Photo" class="w-full h-full object-cover">
+                        </div>
+                        <div class="absolute -bottom-4 -right-4 bg-accent text-dark font-bold px-4 py-2 rounded-lg shadow-lg">
+                            <i class="fas fa-code mr-2"></i>Web Developer
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Me Section -->
+    <section id="about" class="py-16 bg-light">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4 font-poppins">About Me</h2>
+                <div class="w-20 h-1 bg-primary mx-auto"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-dark mb-6">My Background</h3>
+                    <div id="about-content" class="space-y-4 text-gray-600"></div>
+                </div>
+                
+                <div class="space-y-8">
+                    <!-- Skills -->
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+                            <i class="fas fa-cogs text-primary mr-3"></i>Skills
+                        </h3>
+                        <div id="skills-container" class="space-y-6"></div>
+                    </div>
+                    
+                    <!-- Goals -->
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-dark mb-6 flex items-center">
+                            <i class="fas fa-bullseye text-secondary mr-3"></i>Goals
+                        </h3>
+                        <div id="goals-container" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interests Section -->
+    <section id="interests" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4 font-poppins">My Interests</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Areas I'm passionate about and constantly exploring</p>
+            </div>
+            <div id="interests-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-16 bg-light">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4 font-poppins">Featured Projects</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">A showcase of my recent work and development projects</p>
+            </div>
+            <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-dark mb-4 font-poppins">Get In Touch</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">Let's connect and discuss opportunities</p>
+            </div>
+            
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+                <form id="contact-form" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-gray-700 font-medium mb-2">Name</label>
+                            <input type="text" id="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
+                            <input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="subject" class="block text-gray-700 font-medium mb-2">Subject</label>
+                        <input type="text" id="subject" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-gray-700 font-medium mb-2">Message</label>
+                        <textarea id="message" rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <div class="text-2xl font-bold mb-2">
+                        <span class="text-primary">Karan</span>Lohar
+                    </div>
+                    <p class="text-gray-400">Web Developer & IT Student</p>
+                </div>
+                
+                <div class="mb-6 md:mb-0">
+                    <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                    <ul id="footer-links" class="flex flex-wrap gap-4"></ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Connect With Me</h4>
+                    <div id="social-links" class="flex space-x-4"></div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Karan Lohar. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data Layer
+        const navigationItems = [
+            { "label": "Home", "href": "#home", "icon": "fas fa-home" },
+            { "label": "About", "href": "#about", "icon": "fas fa-user" },
+            { "label": "Interests", "href": "#interests", "icon": "fas fa-heart" },
+            { "label": "Projects", "href": "#projects", "icon": "fas fa-code" },
+            { "label": "Contact", "href": "#contact", "icon": "fas fa-envelope" }
+        ];
+
+        const aboutContent = [
+            "Hi, I'm Karan Lohar, a passionate student currently pursuing BSc IT (Second Year) at Jai Hind College, Mumbai.",
+            "I have a strong interest in web development and technology, and I enjoy building creative and user-friendly websites. I am constantly learning new skills and improving my knowledge in areas like HTML, CSS, JavaScript, and basic programming concepts.",
+            "I am enthusiastic about creating modern, responsive designs and developing projects that solve real-world problems. Along with my academic studies, I actively practice coding and work on personal projects to strengthen my technical skills."
+        ];
+
+        const skills = [
+            { "name": "HTML, CSS, JavaScript", "level": 85, "color": "bg-primary" },
+            { "name": "Basic Java & SQL", "level": 70, "color": "bg-secondary" },
+            { "name": "Responsive Web Design", "level": 80, "color": "bg-accent" },
+            { "name": "Problem Solving", "level": 75, "color": "bg-green-500" }
+        ];
+
+        const goals = [
+            "Become a skilled full-stack web developer",
+            "Work on innovative projects that make a positive impact",
+            "Master modern web technologies and frameworks",
+            "Contribute to open-source projects"
+        ];
+
+        const interests = [
+            { 
+                "title": "Web Development", 
+                "description": "Building modern, responsive websites and web applications", 
+                "icon": "fas fa-code",
+                "color": "text-primary"
+            },
+            { 
+                "title": "UI/UX Design", 
+                "description": "Creating intuitive and beautiful user interfaces", 
+                "icon": "fas fa-paint-brush",
+                "color": "text-secondary"
+            },
+            { 
+                "title": "Learning New Technologies", 
+                "description": "Exploring latest frameworks and development tools", 
+                "icon": "fas fa-graduation-cap",
+                "color": "text-accent"
+            },
+            { 
+                "title": "Building Projects", 
+                "description": "Developing practical solutions to real-world problems", 
+                "icon": "fas fa-rocket",
+                "color": "text-green-500"
+            }
+        ];
+
+        const projects = [
+            {
+                "title": "Portfolio Website",
+                "description": "A responsive portfolio website showcasing my skills and projects",
+                "technologies": ["HTML", "CSS", "JavaScript", "Tailwind"],
+                "image": "https://picsum.photos/400/250?random=2",
+                "link": "#"
+            },
+            {
+                "title": "E-commerce Dashboard",
+                "description": "Admin dashboard for managing products and orders",
+                "technologies": ["JavaScript", "Chart.js", "LocalStorage"],
+                "image": "https://picsum.photos/400/250?random=3",
+                "link": "#"
+            },
+            {
+                "title": "Weather App",
+                "description": "Real-time weather application with location detection",
+                "technologies": ["API Integration", "JavaScript", "CSS"],
+                "image": "https://picsum.photos/400/250?random=4",
+                "link": "#"
+            }
+        ];
+
+        const footerLinks = [
+            { "label": "Privacy Policy", "href": "#privacy" },
+            { "label": "Terms of Service", "href": "#terms" },
+            { "label": "Sitemap", "href": "#sitemap" }
+        ];
+
+        const socialLinks = [
+            { "platform": "GitHub", "icon": "fab fa-github", "href": "#", "color": "hover:text-gray-300" },
+            { "platform": "LinkedIn", "icon": "fab fa-linkedin", "href": "#", "color": "hover:text-blue-400" },
+            { "platform": "Twitter", "icon": "fab fa-twitter", "href": "#", "color": "hover:text-blue-300" },
+            { "platform": "Instagram", "icon": "fab fa-instagram", "href": "#", "color": "hover:text-pink-400" }
+        ];
+
+        // Render Functions
+        function renderNavItems(items) {
+            return items.map(item => 
+                `<li><a href="${item.href}" class="text-gray-700 hover:text-primary font-medium transition duration-300 flex items-center">
+                    <i class="${item.icon} mr-2"></i>${item.label}
+                </a></li>`
+            ).join("");
+        }
+
+        function renderAboutContent(paragraphs) {
+            return paragraphs.map(p => `<p class="leading-relaxed">${p}</p>`).join("");
+        }
+
+        function renderSkills(skillsList) {
+            return skillsList.map(skill => `
+                <div>
+                    <div class="flex justify-between mb-1">
+                        <span class="font-medium">${skill.name}</span>
+                        <span class="font-bold">${skill.level}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="skill-bar h-2.5 rounded-full ${skill.color}" style="width: 0%" data-width="${skill.level}"></div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderGoals(goalsList) {
+            return goalsList.map(goal => `
+                <div class="flex items-start">
+                    <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                    <span>${goal}</span>
+                </div>
+            `).join("");
+        }
+
+        function renderInterests(interestsList) {
+            return interestsList.map(interest => `
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300">
+                    <div class="text-3xl ${interest.color} mb-4">
+                        <i class="${interest.icon}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-2">${interest.title}</h3>
+                    <p class="text-gray-600">${interest.description}</p>
+                </div>
+            `).join("");
+        }
+
+        function renderProjects(projectsList) {
+            return projectsList.map(project => `
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300">
+                    <img src="${project.image}" alt="${project.title}" class="w-full h-48 object-cover" loading="lazy">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-dark mb-2">${project.title}</h3>
+                        <p class="text-gray-600 mb-4">${project.description}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            ${project.technologies.map(tech => 
+                                `<span class="bg-gray-100 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">${tech}</span>`
+                            ).join("")}
+                        </div>
+                        <a href="${project.link}" class="inline-flex items-center text-primary font-semibold hover:text-blue-700 transition duration-300">
+                            View Project <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function renderFooterLinks(links) {
+            return links.map(link => 
+                `<li><a href="${link.href}" class="text-gray-400 hover:text-white transition duration-300">${link.label}</a></li>`
+            ).join("");
+        }
+
+        function renderSocialLinks(links) {
+            return links.map(link => 
+                `<a href="${link.href}" class="text-gray-400 ${link.color} text-2xl transition duration-300">
+                    <i class="${link.icon}"></i>
+                </a>`
+            ).join("");
+        }
+
+        // Initialize Page
+        document.addEventListener("DOMContentLoaded", function() {
+            // Navigation
+            document.getElementById("nav-menu").innerHTML = renderNavItems(navigationItems);
+            document.getElementById("mobile-nav-items").innerHTML = renderNavItems(navigationItems);
+            
+            // About Section
+            document.getElementById("about-content").innerHTML = renderAboutContent(aboutContent);
+            document.getElementById("skills-container").innerHTML = renderSkills(skills);
+            document.getElementById("goals-container").innerHTML = renderGoals(goals);
+            
+            // Interests Section
+            document.getElementById("interests-grid").innerHTML = renderInterests(interests);
+            
+            // Projects Section
+            document.getElementById("projects-grid").innerHTML = renderProjects(projects);
+            
+            // Footer
+            document.getElementById("footer-links").innerHTML = renderFooterLinks(footerLinks);
+            document.getElementById("social-links").innerHTML = renderSocialLinks(socialLinks);
+            
+            // Mobile Menu Toggle
+            document.getElementById("mobile-menu-btn").addEventListener("click", function() {
+                const menu = document.getElementById("mobile-menu");
+                menu.classList.toggle("hidden");
+                this.innerHTML = menu.classList.contains("hidden") 
+                    ? '<i class="fas fa-bars text-xl"></i>' 
+                    : '<i class="fas fa-times text-xl"></i>';
+            });
+            
+            // Contact Form Submission
+            document.getElementById("contact-form").addEventListener("submit", function(e) {
+                e.preventDefault();
+                alert("Thank you for your message! I'll get back to you soon.");
+                this.reset();
+            });
+            
+            // Animate skill bars
+            setTimeout(() => {
+                document.querySelectorAll(".skill-bar").forEach(bar => {
+                    const width = bar.getAttribute("data-width");
+                    bar.style.width = width + "%";
+                });
+            }, 500);
+            
+            // Smooth scrolling for anchor links
+            document.addEventListener("click", function(event) {
+                const link = event.target.closest("a[href^='#']");
+                if (!link) return;
+                
+                const targetId = link.getAttribute("href");
+                if (targetId === "#") return;
+                
+                event.preventDefault();
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: "smooth"
+                    });
+                    
+                    // Close mobile menu if open
+                    const mobileMenu = document.getElementById("mobile-menu");
+                    if (!mobileMenu.classList.contains("hidden")) {
+                        mobileMenu.classList.add("hidden");
+                        document.getElementById("mobile-menu-btn").innerHTML = '<i class="fas fa-bars text-xl"></i>';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
